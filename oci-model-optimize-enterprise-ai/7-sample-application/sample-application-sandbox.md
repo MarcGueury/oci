@@ -6,6 +6,20 @@ In this lab, you extract, configure, and run the Example Motors support app on y
 
 Estimated Time: 30 minutes
 
+**File structure used throughout the lab.**
+
+```text
+<home-directory>/
+├── .oci/
+│   ├── config
+│   └── oci_hybrid_hol_api_key.pem
+└── Downloads/
+    └── sample-app/
+        └── .env
+```
+
+This is the file structure used throughout the lab.
+
 ### Objectives
 
 In this lab, you will:
@@ -23,12 +37,16 @@ In this lab, you will:
 This lab assumes you have:
 
 - Completed the Semantic Store lab
+- Have Python installed on your computer or be able to install it
+- Be comfortable with running terminal/command-line commands to copy, rename, edit text files, create folders etc.
+- Be able to download the zip archive for the sample application, unzip it and run it as a Python script
+- Be able to install Python dependencies with `python -m pip`
 
-> **Note:** If your computer already has Python installed and `python3 --version` on Mac or `py -3 --version` on Windows shows a Python version, move to Task 2.
+> **Note:** If your computer already has Python 3.10 and above installed and `python3 --version` on Mac or `py -3 --version` on Windows shows a valid Python version, move to Task 2.
 
 ## Task 1: Install Python
 
-1. Download Python from [python.org/downloads](https://www.python.org/downloads/).
+1. Download Python from [python.org/downloads](https://www.python.org/downloads/). Please make sure you choose version 3.10 or newer.
 
 1. Run the installer.
 
@@ -58,6 +76,8 @@ This lab assumes you have:
 
 1. Download [sample-app.zip](files/sample-app.zip).
 
+    > **Note for Windows:** Extract the app near a short path, such as `C:\labs\sample-app`, before you create the virtual environment or install dependencies. Deep folder paths can cause Windows path-length failures in generated OCI SDK files. If your organization allows it, enabling Windows long paths also avoids this issue.
+
 1. Open a terminal window.
 
     On Mac:
@@ -65,6 +85,8 @@ This lab assumes you have:
     - Command + Spacebar
     - Type terminal
     - Press Return.
+
+    > **Note:** The sample application contains a hidden file called `.env.example`. By default, this file cannot be seen in Finder. In order to see hidden files, use the following keyboard shortcut while in Finder: Shift + CMD + Period (the '.' character). This will also be helpful later when we interact with the `~/.oci` folder which is also hidden.
 
     On Windows:
 
@@ -92,7 +114,7 @@ This lab assumes you have:
     </copy>
     ```
 
-    ![Powershell at download folder](./images/windows-powershell-downloads.png)
+    ![PowerShell at download folder](./images/windows-powershell-downloads.png)
 
 1. Extract the sample application archive.
 
@@ -114,7 +136,7 @@ This lab assumes you have:
     </copy>
     ```
 
-    ![Powershell unzip the sample app](./images/windows-powershell-unzip-sample-app.png)
+    ![PowerShell unzip the sample app](./images/windows-powershell-unzip-sample-app.png)
 
 1. Confirm that the extraction created the `sample-app` directory.
 
@@ -122,7 +144,7 @@ This lab assumes you have:
 
     ```bash
     <copy>
-    ls sample-app
+    ls -la sample-app
     </copy>
     ```
 
@@ -142,7 +164,7 @@ This lab assumes you have:
 
 1. Select the **Tokens and keys** tab.
 
-1. Under API keys click **Add API key**.
+1. Under API keys, click **Add API key**.
 
     ![Add API key](./images/add-api-key.png)
 
@@ -152,13 +174,15 @@ This lab assumes you have:
 
     ![Generate API key pair](./images/generate-api-key-pair.png)
 
+    > **Note:** Treat the private key and OCI config as credentials. Do not commit them to source control, paste them into chat or email, or share them with other attendees.
+
 1. Click **Add**.
 
 1. Copy the generated configuration file preview. Save this information in your notes.
 
     ![Configuration file preview](./images/configuration-file-preview.png)
 
-1. Back in the terminal screen, create the `.oci` directory.
+1. Back in the terminal screen, create the `.oci` directory in your home directory.
 
     > **Note:** If you already have an `.oci` folder and a `config` file in it, then you can re-use this file. Skip the creation steps and jump to the part where we update the file. Keep the updates at the end of the file so you do not overwrite the existing configuration.
 
@@ -191,12 +215,28 @@ This lab assumes you have:
     </copy>
     ```
 
-    On Windows PowerShell, replace `<downloaded-private-key-file>` with downloaded key file name. It is typically similar to `<user-name>-<date-time>.key`.
+    On Windows PowerShell, replace `<downloaded-private-key-file>` with the downloaded key file name. It is typically similar to `<user-name>-<date-time>.key`.
 
     ```powershell
     <copy>
     Move-Item $HOME\Downloads\<downloaded-private-key-file> $HOME\.oci\oci_hybrid_hol_api_key.pem
     </copy>
+    ```
+
+1. Find your home directory path before you open the OCI config file. Run the commands for your operating system, **then copy the absolute path displayed by `pwd`**. You will paste this value into the `key_file=` line in the configuration file.
+
+    On Mac:
+
+    ```text
+    cd ~
+    pwd
+    ```
+
+    On Windows:
+
+    ```text
+    cd $HOME
+    pwd
     ```
 
 1. Open the OCI config file. You can use your favorite text editor or `nano` for Mac and `Notepad` for Windows as described below.
@@ -225,33 +265,17 @@ This lab assumes you have:
     </copy>
     ```
 
-    > **Note:** Please pay attention to the dot at the end of the file name! If we didn't add it at the end of the file name, Notepad would create a file called config.txt by default. Also, if notepad is asking if you wish to create a new file, click **Yes**.
+    > **Note:** Please pay attention to the dot at the end of the file name! If we didn't add it at the end of the file name, Notepad would create a file called config.txt by default. Also, if Notepad is asking if you wish to create a new file, click **Yes**.
 
 1. Paste the configuration file preview into the file. If you already have content in the file, paste the new configuration at the end of the file. In addition, if you already have a `[DEFAULT]` profile in this file, rename this new profile, for example to: `[MODELOPTHOL]`, and remember to change the profile name in the app `.env` file later in this lab.
 
-    ![Edit the config file in the termina](./images/terminal-edit-config-file2.png)
+    ![Edit the config file in the terminal](./images/terminal-edit-config-file2.png)
 
     ![Editing OCI config file with notepad](./images/notepad-edit-config-file.png)
 
-1. Update the `key_file` line to point to the API private key we've downloaded and moved to the `.oci` folder. Please make sure to specify the full path of your home folder. don't use special expressions such as `~` on Mac or `$HOME`, `%USERPOFILE%` on Windows.
+1. Update the `key_file` line to point to the API private key we've downloaded and moved to the `.oci` folder. Paste the absolute home directory path you copied into the `key_file=` value, then append the private key path shown below. Do not use special expressions such as `~` on Mac or `$HOME`, `%USERPROFILE%` on Windows.
 
-    If you don't know your home directory, the following two commands will print the folder to the screen.
-
-    On Mac:
-
-    ```text
-    cd ~
-    pwd
-    ```
-
-    On Windows:
-
-    ```text
-    cd $HOME
-    pwd
-    ```
-
-    Specify the full path to the API private key file:
+    The completed `key_file` line should use the following format:
 
     On Mac:
 
@@ -269,7 +293,7 @@ This lab assumes you have:
     </copy>
     ```
 
-    > **Note:** Please make sure to remove the `# TODO` comment from the `key_file` line it is was left there.
+    > **Note:** Please make sure to remove the `# TODO` comment from the `key_file` line.
 
 1. Save the file.
 
@@ -289,7 +313,7 @@ This lab assumes you have:
 
     ```bash
     <copy>
-    ls ~/.oci/config ~/.oci/oci_hybrid_hol_api_key.pem
+    ls -la ~/.oci/config ~/.oci/oci_hybrid_hol_api_key.pem
     </copy>
     ```
 
@@ -325,9 +349,9 @@ This lab assumes you have:
     </copy>
     ```
 
-2. Rename the environment template to `.env`.
+2. Rename the environment template file `.env.example` to `.env`.
 
-    On Mac:
+    On Mac you can do this on finder (make sure that you can see hidden file using the keyboard shortcut Shift + CMD + Period) or in the terminal:
 
     ```bash
     <copy>
@@ -335,7 +359,7 @@ This lab assumes you have:
     </copy>
     ```
 
-    On Windows PowerShell:
+    On Windows you can do this in File Explorer or using PowerShell:
 
     ```powershell
     <copy>
@@ -343,22 +367,25 @@ This lab assumes you have:
     </copy>
     ```
 
-3. Open your sandbox resource list and the notes where you recorded the Enterprise AI OCIDs created in the previous labs.
+3. Open your sandbox values worksheet from the Unstructured RAG lab.
 
 4. Open `.env` in your favorite editor. You can also use `nano` for Mac or `notepad` for Windows.
 
-5. Replace the blank OCID values in `.env` with the values from your sandbox resource list and your workshop notes.
+5. Replace the blank values in `.env` with the values from your sandbox resource list and your workshop notes.
 
     ```text
     OCI_GENAI_GUARDRAILS_COMPARTMENT_OCID=<Compartment OCID from the sandbox resources list>
-    OCI_GENAI_PROJECT_OCID=<Project OCID fromn your notes>
-    OCI_GENAI_VECTOR_STORE_IDS=<Unstructured vector store OCID from your notes>
+    OCI_GENAI_PROJECT_OCID=<Project OCID from your notes>
+    OCI_GENAI_VECTOR_STORE_IDS=<Unstructured Vector store ID from your notes>
     OCI_ADB_DATABASE_OCID=<ADB OCID from the sandbox resources list>
     OCI_ADB_MCP_PASSWORD_SECRET_OCID=<Admin Password Secret OCID from the sandbox resources list>
     OCI_GENAI_SEMANTIC_STORE_OCID=<Structured semantic store OCID from your notes>
     ```
 
-6. Set each region value to the `Workshop region` value from your sandbox resource list. The format of the region is: <country>-<region>-<number> for example: `us-ashburn-1`.
+6. Set each region value to the `Workshop region` value from your sandbox resource list (the same value in all of them).
+
+    > **Note:** the region name takes the following format <country code>-<region name>-<number>, for example: `us-ashburn-1` or `ca-toronto-1` etc. Please make sure not to paste any other information or spaces/new lines in the region value.
+
 
     ```text
     OCI_ADB_MCP_REGION=<Workshop region>
@@ -396,7 +423,7 @@ This lab assumes you have:
     OCI_CONFIG_PROFILE=DEFAULT
     ```
 
-8. Keep the advanced defaults. You will be able to play with those later.
+8. Keep the advanced defaults. You will be able to change those later.
 
     End result on Mac:
 
@@ -406,11 +433,11 @@ This lab assumes you have:
 
     ![Notepad edit .env file](./images/notepad-edit-dot-env.png)
 
-9. Save `.env` and exist the file editor.
+9. Save the `.env` file.
 
 ## Task 5: Install dependencies
 
-1. Create a Python virtual environment. This will help shield your other python applications from the dependencies we are going to install for the sample app and vice versa.
+1. Create a Python virtual environment. This will help shield your other Python applications from the dependencies we are going to install for the sample app and vice versa.
 
     > **Note:** Make sure that you are in the `sample-app` folder.
 
@@ -440,6 +467,10 @@ This lab assumes you have:
     </copy>
     ```
 
+    The end result should look similar to this:
+
+    ![Setup venv on mac](./images/terminal-setup-venv.png)
+
     On Windows PowerShell:
 
     ```powershell
@@ -456,11 +487,7 @@ This lab assumes you have:
     </copy>
     ```
 
-    On Mac:
-
-    ![Setup venv on mac](./images/terminal-setup-venv.png)
-
-    Windows:
+    The end result should look similar to this:
 
     ![Setup venv on windows](./images/windows-setup-venv.png)
 
@@ -468,7 +495,7 @@ This lab assumes you have:
 
     ```bash
     <copy>
-    pip install -r requirements.txt
+    python -m pip install -r requirements.txt
     </copy>
     ```
 
@@ -502,6 +529,8 @@ This lab assumes you have:
     </copy>
     ```
 
+    > **Note:** In order to send your request to the LLM, paste the prompt in the text box and press the **Send** button.
+
 2. Confirm that the app answers from the infotainment pairing guide.
 
     ![Pair phone answer](./images/pair-phone-answer.png)
@@ -518,6 +547,8 @@ This lab assumes you have:
 
 ## Task 8: Test service-record retrieval
 
+Your exact answer can vary by the displayed `Customer ID`. Success means the answer is scoped to the current customer and uses the database retrieval path.
+
 1. Ask this question:
 
     ```text
@@ -530,28 +561,26 @@ This lab assumes you have:
 
     ![Service request console output](./images/service-request-console-output.png)
 
-3. If SQL retrieval fails, verify:
+3. If SQL retrieval fails, verify the values of the following parameters in the `.env` file:
 
     ```text
-    <copy>
     OCI_CONFIG_FILE
     OCI_CONFIG_PROFILE
     OCI_GENAI_SEMANTIC_STORE_OCID
     OCI_ADB_DATABASE_OCID
     OCI_ADB_MCP_USERNAME
     OCI_ADB_MCP_PASSWORD_SECRET_OCID
-    </copy>
     ```
 
 ## Task 9: Test an image prompt
 
-1. Right click the following link and save the sample image file to your computer: [Sample service receipt image](files/example-motors-service-receipt.png).
+1. Right-click the following link and save the sample image file to your computer: [Sample service receipt image](files/example-motors-service-receipt.png).
 
 1. In the chat input, attach the downloaded image and add the following prompt:
 
     ```text
     <copy>
-    Summarize the service receipt in this image.
+    List the services shown on this receipt in five bullets.
     </copy>
     ```
 
@@ -559,7 +588,7 @@ This lab assumes you have:
 
 1. Confirm that the app responds using the image contents.
 
-At this stage we have a running sample application which touches every part of our architecture. It queries our Unstructured Vector Store to retrieve information from our operation manuals, queries our database using the Semantic Store and the ADB MCP, and interacts with the LLM managed by the OCI Enterprise AI service.
+At this stage, we have a running sample application that touches every part of our architecture. It queries our Unstructured Vector Store to retrieve information from our operation manuals, queries our database using the Semantic Store and the ADB MCP, and interacts with the LLM managed by the OCI Enterprise AI service.
 We've also observed that the same LLM is being used to serve all requests. We are going to change that in the next lab.
 
 You may now **proceed to the next lab**.

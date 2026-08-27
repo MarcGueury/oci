@@ -2,7 +2,7 @@
 
 ## Introduction
 
-In this lab, you create the unstructured retrieval source for the Example Motors support agent. Your environment already includes an Object Storage bucket with instructions for Example Motor's infotainment bluetooth pairing guide in PDF format. You will create an OCI Enterprise AI project, create an unstructured vector store, and sync the existing PDF into the vector store. The app will query the vector store using the OCI Enterprise AI Responses API by leveraging the built in `file_search` tool.
+In this lab, you create the unstructured retrieval source for the Example Motors support agent. Your environment already includes an Object Storage bucket with instructions for Example Motors' infotainment Bluetooth pairing guide in PDF format. You will create an OCI Enterprise AI project, create an unstructured vector store, and sync the existing PDF into the vector store. The app will query the vector store using the OCI Enterprise AI Responses API by leveraging the built-in `file_search` tool.
 
 Estimated Time: 15 minutes
 
@@ -15,32 +15,58 @@ In this lab, you will:
 - Confirm the existing Object Storage bucket and infotainment pairing guide PDF
 - Create an unstructured vector store
 - Create and run a data sync connector
-- Record the project and vector store OCIDs for the sample app
+- Record the project OCID and Vector store ID for the sample app
 
 ## Task 1: Review the sandbox resource list
 
-1. The sandbox environment has already provisioned the OCI foundation resources for this workshop. You will be able to see the OCIDs (the resource ID) for each of them in the sandbox environment alongside the login and tenancy information. We will use this information as we progress through the workshop.
+1. The sandbox environment has already provisioned the OCI foundation resources for this workshop. You will be able to see the OCIDs and other resource values in the sandbox environment alongside the login and tenancy information. We will use this information as we progress through the workshop.
 
     ![Sandbox details](images/sandbox-details.png)
 
-2. In parallel, you are going to create several resources yourself and we would need to collect the OCIDs of the resources.
-Use your favorite editor to edit a simple text file and copy the following placeholders into it:
+2. When any task asks you to select a compartment, expand **LiveLabs** and select the reservation-specific child compartment named like `LL<reservation>-COMPARTMENT`. Do not select the parent **LiveLabs** compartment.
 
-    ```text
+3. Use your favorite editor to create a simple worksheet for the values used by the sample app and Gen AI tools.
+
+    | Value | Where to get it | Later `.env` variable | Where value is needed |
+    | --- | --- | --- | --- |
+    | Workshop compartment OCID | Sandbox resource list | `OCI_GENAI_GUARDRAILS_COMPARTMENT_OCID` | `.env` |
+    | Workshop region | Sandbox resource list | `OCI_ADB_MCP_REGION`, `OCI_ADB_MCP_PASSWORD_SECRET_REGION`, `OCI_GENAI_REGION` | `.env` |
+    | Autonomous AI Database OCID | Sandbox resource list | `OCI_ADB_DATABASE_OCID` | `.env` |
+    | Database Tools enrichment connection OCID | Sandbox resource list |  | Semantic Store configuration |
+    | Database Tools query connection OCID | Sandbox resource list |  | Semantic Store configuration |
+    | ADMIN password secret OCID | Sandbox resource list | `OCI_ADB_MCP_PASSWORD_SECRET_OCID` | `.env` |
+    | Project OCID | Project created in this lab | `OCI_GENAI_PROJECT_OCID` | `.env` |
+    | Unstructured Vector store ID, for example | Vector store created in this lab | `OCI_GENAI_VECTOR_STORE_IDS` | `.env` |
+    | Structured semantic store OCID | Semantic Store lab | `OCI_GENAI_SEMANTIC_STORE_OCID` | `.env` |
+    | OCI config file path | Sample Application lab | `OCI_CONFIG_FILE` | `.env` |
+    | OCI config profile | Sample Application lab | `OCI_CONFIG_PROFILE` | `.env` |
+
+    Copy the following values into your text file. Fill in each value as you complete the workshop. At this time, you should fill in the six values found on the Sandbox Resource List.
+
+    ```
     <copy>
-    Project OCID:
-    Unstructured vector store OCID:
-    Structured semantic store OCID:
+    (Sandbox Resource List)     OCI_GENAI_GUARDRAILS_COMPARTMENT_OCID=
+    (Sandbox Resource List)     OCI_ADB_MCP_REGION=
+    (Sandbox Resource List)     OCI_ADB_MCP_PASSWORD_SECRET_REGION=
+    (Sandbox Resource List)     OCI_GENAI_REGION=
+    (Sandbox Resource List)     OCI_ADB_DATABASE_OCID=
+    (Sandbox Resource List)     OCI_ADB_MCP_PASSWORD_SECRET_OCID=
+    (OCI Gen AI)                OCI_GENAI_PROJECT_OCID=
+    (OCI Gen AI)                OCI_GENAI_VECTOR_STORE_IDS=
+    (OCI Gen AI)                OCI_GENAI_SEMANTIC_STORE_OCID=
+    (Sample Application Lab)    OCI_CONFIG_FILE=
+    (Sample Application Lab)    OCI_CONFIG_PROFILE=
+    
     </copy>
     ```
 
-    As we progress through the following tasks and labs, you will fill in the missing OCIDs that we will use for the sample app in a later lab.
+    As we progress through the following tasks and labs, you will fill in the missing values that we will use for the sample app in a later lab.
 
 ## Task 2: Create the OCI Enterprise AI project
 
 OCI Generative AI projects organize conversations and responses under a shared set of settings. In a project, you define data retention periods, enable long-term memory, and enable short-term memory compaction.
 
-When an application makes API requests against the OCI Enterprise AI service's responses/conversations APIs, referencing the project in the API call tells the service to use this the configuration defined in the project for this call.
+When an application makes API requests against the OCI Enterprise AI service's responses/conversations APIs, referencing the project in the API call tells the service to use the configuration defined in the project for this call.
 
 Each project supports separate lifecycle and compliance boundaries. Reference the project OCID in API and SDK calls to apply project settings at runtime.
 
@@ -52,7 +78,7 @@ Each project supports separate lifecycle and compliance boundaries. Reference th
 
     ![Generative AI projects list](images/generative-ai-projects.png)
 
-1. Please make sure that your sandbox compartment is selected in **Applied filters**.
+1. Make sure that your reservation-specific child compartment is selected in **Applied filters**.
 
 1. Click **Create project**.
 
@@ -64,13 +90,13 @@ Each project supports separate lifecycle and compliance boundaries. Reference th
     Compartment: <workshop-compartment>
     ```
 
-    Use the workshop compartment from your sandbox resource list.
+    Use the reservation-specific child compartment from your sandbox resource list.
 
     ![Create project basic information](images/create-project-basic-information.png)
 
 1. Observe the response and conversation retention for the workshop.
 
-    For this workshop we will leave those values at default but this setting can be configured to control how long the system will retain responses and conversations sent over the Responses and Conversations APIs.
+    For this workshop we will leave those values at their default values, but this setting can be configured to control how long the system will retain responses and conversations sent over the Responses and Conversations APIs.
 
     ![Project data retention options](images/project-data-retention.png)
 
@@ -86,7 +112,7 @@ The sandbox already includes the Object Storage bucket that stores the source do
 
 1. In the Console navigation menu, go to **Storage**, then **Buckets**.
 
-2. Select the workshop compartment from your sandbox resource list.
+2. Select the reservation-specific child compartment from your sandbox resource list.
 
 3. Open the bucket named in your sandbox resource list.
 
@@ -117,7 +143,7 @@ The unstructured vector store scans files, splits them into chunks, embeds the c
     Description: Example Motors infotainment and operation manuals
     ```
 
-    - Select the workshop compartment from your sandbox resource list.
+    - Select the reservation-specific child compartment from your sandbox resource list.
     - Under **Data source type**, select **Unstructured data**.
 
     ![Create vector store with unstructured data source](images/create-vector-stores.png)
@@ -132,7 +158,7 @@ The unstructured vector store scans files, splits them into chunks, embeds the c
 
     ![Vector store details page](images/vector-store-details.png)
 
-8. Copy the vector store ID and record it as the value for `Unstructured vector store OCID`.
+8. Copy the **Vector store ID** and record it as the value for `Unstructured Vector store ID`. The value should look like `vs_iad_3vw620r...`.
 
 ## Task 5: Create the data sync connector
 
@@ -148,7 +174,7 @@ The data sync connector facilitates the processing pipeline where files are read
 
     ```text
     Name: car-manuals
-    Compartment: Select the workshop compartment from your sandbox resource list.
+    Compartment: Select the reservation-specific child compartment from your sandbox resource list.
     Bucket: The bucket name is `car-manufacturer-manuals-...`.
     Turn Select all in bucket on.
     ```
