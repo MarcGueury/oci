@@ -159,13 +159,13 @@ For more information: https://opencode.ai/
 
     ![OpenCode](images/opencode_plan1.png)
 
-3. Type: *Write a HTML mobile Application to order food in a restaurant.*
+3. Type: *Write an HTML mobile application to order food in a restaurant.*
 
 4. OpenCode will ask some questions. Answer them, and then OpenCode will generate a plan.
 
 5. When ready, press Tab again to switch to Build mode. Then type: *Build it.*
 
-6. Ask to deploy it: *Deploy*. Click on the html link.
+6. Ask to deploy it: *Deploy*. Click on the HTML link.
 
     ![Restaurant](images/opencode_resto_qwen36_1.png)
     ![Restaurant](images/opencode_resto_qwen36_2.png)

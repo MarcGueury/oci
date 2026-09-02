@@ -3,7 +3,7 @@
 ## Introduction
 In this lab, you will prepare OCI to use Generative AI / Large Language models.
 
-Optionally, you will import an Open Weight model in a Dedicated AI Cluster (DAC).
+Optionally, you will import an open-weight model in a Dedicated AI Cluster (DAC).
 
 DAC-hosted models run on dedicated infrastructure in your tenancy. Use a DAC-hosted model when you need production-grade control over model hosting and inference. DACs provide several advantages: Flexibility, Isolation, Predictable latency, Fine-tuning support, Cost efficiency at scale, Deployment near data, Simplified management
 
