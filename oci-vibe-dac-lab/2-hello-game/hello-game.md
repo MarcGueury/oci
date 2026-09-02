@@ -119,7 +119,7 @@ For more information: https://opencode.ai/
 
     ![Space Invaders](images/space-invaders_grok420.png)
 
-## Task 4: Improve: plan + build
+## Task 4: Space Invaders: plan + build
 
 1. Return to OpenCode.
 2. In the OpenCode prompt, press Tab. The agent will switch to Plan mode.
@@ -142,7 +142,36 @@ For more information: https://opencode.ai/
 
     ![Space Invaders](images/opencode_plan5.png)
 
-## Task 5: Skills
+7. Exit (press CTRL+C).
+
+## Task 5: Mobile : plan + build
+
+1. Start OpenCode in the space-invaders directory.
+
+    ````
+    <copy>    
+    cd $HOME/oci-vibe-dac/mobile
+    opencode
+    </copy>    
+    ````
+
+2. In the OpenCode prompt, press Tab. The agent will switch to Plan mode.
+
+    ![OpenCode](images/opencode_plan1.png)
+
+3. Type: *Write a HTML mobile Application to order food in a restaurant.*
+
+4. OpenCode will ask some questions. Answer them, and then OpenCode will generate a plan.
+
+5. When ready, press Tab again to switch to Build mode. Then type: *Build it.*
+
+6. Ask to deploy it: *Deploy*. Click on the html link.
+
+    ![Restaurant](images/opencode_resto_qwen36_1.png)
+    ![Restaurant](images/opencode_resto_qwen36_2.png)
+    ![Restaurant](images/opencode_resto_qwen36_3.png)
+
+## Task 6: Skills
 
 During the two previous tasks, you used the deploy skill several times. It is a kind of prompt that defines a workflow or process. Let’s look at it.
 
@@ -186,7 +215,7 @@ For more information: https://agentskills.io/home
 
 <<< At its core, a skill is a folder containing a SKILL.md file. This file includes metadata (name and description, at minimum) and instructions that tell an agent how to perform a specific task. Skills can also bundle scripts, reference materials, templates, and other resources. >>>
 
-## Task 6: More models
+## Task 7: More models
 
 Try other models and repeat the exercises. New models are available regularly, and they are improving rapidly in performance and quality.
 
